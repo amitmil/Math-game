@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>פּוֹקֵי-מָתֵמָטִיקָה</title>
+    <style>
+        :root {
+            --bg-color: #F3F4F6;
+            --primary-color: #3B82F6;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+            --gold-color: #F59E0B;
+            --text-main: #1F2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* מובייל קונטיינר קבוע ללא גלילה */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 750px;
+            background-color: #FFFFFF;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            justify-content: space-between;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* מסך פרופיל */
+        .profile-title {
+            text-align: center;
+            font-size: 28px;
+            color: var(--primary-color);
+            margin-top: 20px;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .avatar-option {
+            border: 3px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary-color);
+            background-color: #EFF6FF;
+            transform: scale(1.05);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* מסך משחק */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .streak-badge { color: var(--danger-color); }
+        .gold-badge { color: var(--gold-color); }
+
+        .exercise-card {
+            background-color: #F9FAFB;
+            border: 2px solid #E5E7EB;
+            border-radius: 24px;
+            padding: 30px 10px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .exercise-text {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .answer-display {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-height: 55px;
+        }
+
+        /* מקלדת נומרית מובנית */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .key {
+            background-color: #F3F4F6;
+            border: none;
+            border-radius: 16px;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #374151;
+            cursor: pointer;
+            active-background: #E5E7EB;
+        }
+
+        .key:active {
+            background-color: #E5E7EB;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* מסך פאזל / סוף שלב */
+        .puzzle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .puzzle-board {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            background-color: #E5E7EB;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 2px;
+        }
+
+        .puzzle-piece {
+            background-color: #9CA3AF; /* צבע חלקים חסרים - מוצלל */
+            transition: background-color 0.3s;
+        }
+
+        .puzzle-piece.unlocked {
+            background-color: var(--primary-color); /* פוקימון רגיל שמתגלה */
+        }
+
+        .puzzle-board.gold .puzzle-piece.unlocked {
+            background-color: var(--gold-color); /* פוקימון זהב שמתגלה */
+        }
+
+        /* אפקטים וחגיגות */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #F59E0B;
+            animation: fall 2s linear infinite;
+            top: -10px;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(760px) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    
+    <div id="screen-profile" class="screen active">
+        <h1 class="profile-title">בְּחַר מְאַמֵּן! 👦👧</h1>
+        
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selectAvatar('👦', this)">👦</div>
+            <div class="avatar-option" onclick="selectAvatar('👧', this)">👧</div>
+            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
+        </div>
+
+        <div class="form-group">
+            <label>שֵׁם הַמְּאַמֵּן:</label>
+            <input type="text" id="player-name" value="אַלּוּף">
+        </div>
+
+        <div class="form-group">
+            <label>רָמַת הַמִּשְׂחָק (עַד כַּמָּה):</label>
+            <select id="game-range">
+                <option value="20">עַד 20</option>
+                <option value="30" selected>עַד 30</option>
+                <option value="50">עַד 50</option>
+                <option value="100">עַד 100</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>רָמַת קֹשִׁי:</label>
+            <select id="game-difficulty" onchange="updateDifficultyTarget()">
+                <option value="easy">קַלָּה (7 תְּשׁוּבוֹת לְחֵלֶק)</option>
+                <option value="medium">בֵּינוֹנִית (5 תְּשׁוּבוֹת לְחֵלֶק)</option>
+                <option value="hard">קָשָׁה (3 תְּשׁוּבוֹת לְחֵלֶק)</option>
+            </select>
+        </div>
+
+        <button class="action-btn" onclick="startGame()">קָדִימָה, לַמִּשְׂחָק! 🚀</button>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="top-bar">
+            <span class="streak-badge" id="game-streak">🔥 רֶצֶף: 0</span>
+            <span class="gold-badge" id="game-gold-progress">👑 זָהָב: 0/0</span>
+            <span id="game-progress">🎯 חֵלֶק: 0/7</span>
+        </div>
+
+        <div class="exercise-card">
+            <div class="exercise-text" id="exercise-text">כַּמָּה זֶה...</div>
+            <div class="answer-display" id="answer-display">?</div>
+        </div>
+
+        <div class="keypad">
+            <button class="key" onclick="pressKey('1')">1</button>
+            <button class="key" onclick="pressKey('2')">2</button>
+            <button class="key" onclick="pressKey('3')">3</button>
+            <button class="key" onclick="pressKey('4')">4</button>
+            <button class="key" onclick="pressKey('5')">5</button>
+            <button class="key" onclick="pressKey('6')">6</button>
+            <button class="key" onclick="pressKey('7')">7</button>
+            <button class="key" onclick="pressKey('8')">8</button>
+            <button class="key" onclick="pressKey('9')">9</button>
+            <button class="key" style="background-color:#E5E7EB;" onclick="pressKey('C')">💥</button>
+            <button class="key" onclick="pressKey('0')">0</button>
+            <button class="key" style="background-color:#E5E7EB;" onclick="pressKey('B')">⌫</button>
+        </div>
+
+        <button class="action-btn" id="btn-submit" onclick="checkAnswer()">בְּדֹק! ✔️</button>
+    </div>
+
+    <div id="screen-puzzle" class="screen">
+        <h2 style="text-align: center; margin-top:10px;" id="puzzle-title">קִבַּלְתָּ חֵלֶק פָּאזֶל! 🧩</h2>
+        
+        <div class="puzzle-container">
+            <div class="puzzle-board" id="puzzle-board">
+                </div>
+            <div id="puzzle-status-text" style="font-weight: bold; font-size: 18px; text-align: center;"></div>
+        </div>
+
+        <button class="action-btn" onclick="nextStage()">לַשָּׁלָב הַבָּא! ➡️</button>
+    </div>
+
+</div>
+
+<script>
+    // משתני המצב של האפליקציה (State)
+    let player = { name: "אלוף", avatar: "👦", maxRange: 30, difficulty: "easy" };
+    let currentStreak = 0;
+    let correctAnswersCount = 0;
+    let targetAnswers = 7; // משתנה לפי רמה
+    
+    // מעקב שלבים לצורך פוקימון זהב
+    let completedStagesCount = 0;
+    let goldTargetStages = 10; // קל=10, בינוני=7, קשה=3
+
+    // פוקימונים (5 מתוך 50 נבחרים רנדומלית בכל הרצה)
+    let activePokemonIndex = 1;
+    let pokemonCollection = {
+        regular: { pieces: 0, completed: 0 },
+        gold: { pieces: 0, completed: 0 }
+    };
+
+    let currentQuestion = { num1: 0, num2: 0, op: '+', answer: 0 };
+    let userTypedAnswer = "";
+    let isGoldReward = false;
+
+    function selectAvatar(emoji, element) {
+        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        player.avatar = emoji;
+    }
+
+    function updateDifficultyTarget() {
+        const diff = document.getElementById('game-difficulty').value;
+        player.difficulty = diff;
+        if (diff === 'easy') { targetAnswers = 7; goldTargetStages = 10; }
+        if (diff === 'medium') { targetAnswers = 5; goldTargetStages = 7; }
+        if (diff === 'hard') { targetAnswers = 3; goldTargetStages = 3; }
+    }
+
+    function startGame() {
+        player.name = document.getElementById('player-name').value;
+        player.maxRange = parseInt(document.getElementById('game-range').value);
+        updateDifficultyTarget();
+
+        // אתחול מדדים
+        correctAnswersCount = 0;
+        updateTopBar();
+        
+        switchScreen('screen-game');
+        generateQuestion();
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function updateTopBar() {
+        document.getElementById('game-streak').innerText = `🔥 רֶצֶף: ${currentStreak}`;
+        document.getElementById('game-progress').innerText = `🎯 חֵלֶק: ${correctAnswersCount}/${targetAnswers}`;
+        document.getElementById('game-gold-progress').innerText = `👑 זָהָב: ${completedStagesCount}/${goldTargetStages}`;
+    }
+
+    function generateQuestion() {
+        userTypedAnswer = "";
+        document.getElementById('answer-display').innerText = "?";
+        document.getElementById('answer-display').style.color = "var(--primary-color)";
+        document.getElementById('btn-submit').innerText = "בְּדֹק! ✔️";
+        document.getElementById('btn-submit').style.backgroundColor = "var(--success-color)";
+
+        let n1 = Math.floor(Math.random() * (player.maxRange - 5)) + 5;
+        let n2 = Math.floor(Math.random() * 10) + 1;
+        let op = Math.random() > 0.5 ? '+' : '-';
+
+        if (op === '-') {
+            if (n1 < n2) { let temp = n1; n1 = n2; n2 = temp; }
+            currentQuestion.answer = n1 - n2;
+        } else {
+            currentQuestion.answer = n1 + n2;
+        }
+
+        currentQuestion.num1 = n1;
+        currentQuestion.num2 = n2;
+        currentQuestion.op = op;
+
+        let opHebrew = op === '+' ? 'וְעוֹד' : 'פָּחוֹת';
+        document.getElementById('exercise-text').innerText = `כַּמָּה זֶה\n${n1} ${opHebrew} ${n2}?`;
+    }
+
+    function pressKey(key) {
+        if (document.getElementById('btn-submit').innerText === "הַבָּא ➡️") return;
+
+        if (key === 'C') {
+            userTypedAnswer = "";
+        } else if (key === 'B') {
+            userTypedAnswer = userTypedAnswer.slice(0, -1);
+        } else {
+            if (userTypedAnswer.length < 3) userTypedAnswer += key;
+        }
+        document.getElementById('answer-display').innerText = userTypedAnswer || "?";
+    }
+
+    function checkAnswer() {
+        const btn = document.getElementById('btn-submit');
+        if (btn.innerText === "הַבָּא ➡️") {
+            generateQuestion();
+            return;
+        }
+
+        if (!userTypedAnswer) return;
+
+        let userVal = parseInt(userTypedAnswer);
+        if (userVal === currentQuestion.answer) {
+            correctAnswersCount++;
+            currentStreak++;
+            document.getElementById('answer-display').innerText = "נָכוֹן! 🎉";
+            document.getElementById('answer-display').style.color = "var(--success-color)";
+            
+            // בונוס מיוחד על 5 תשובות נכונות ברצף
+            if (currentStreak === 5) {
+                correctAnswersCount = Math.min(correctAnswersCount + 1, targetAnswers);
+                alert("בּוֹנוּס רֶצֶף! חֵלֶק נוסף מִתְקָרֵב!");
+            }
+        } else {
+            currentStreak = 0;
+            document.getElementById('answer-display').innerText = `טָעוּת... (${currentQuestion.answer})`;
+            document.getElementById('answer-display').style.color = "var(--danger-color)";
+        }
+
+        updateTopBar();
+
+        if (correctAnswersCount >= targetAnswers) {
+            // הילד סיים שלב וזכה בחלק רגיל!
+            completedStagesCount++;
+            pokemonCollection.regular.pieces++;
+            isGoldReward = false;
+
+            // בדיקה אם הגיע הזמן לחלק זהב מיוחד
+            if (completedStagesCount >= goldTargetStages) {
+                completedStagesCount = 0;
+                pokemonCollection.gold.pieces++;
+                isGoldReward = true;
+            }
+
+            setTimeout(showPuzzleScreen, 1200);
+        } else {
+            btn.innerText = "הַבָּא ➡️";
+            btn.style.backgroundColor = "var(--primary-color)";
+        }
+    }
+
+    function showPuzzleScreen() {
+        switchScreen('screen-puzzle');
+        const board = document.getElementById('puzzle-board');
+        board.innerHTML = "";
+        
+        let targetMap = isGoldReward ? pokemonCollection.gold : pokemonCollection.regular;
+        
+        if (isGoldReward) {
+            board.classList.add('gold');
+            document.getElementById('puzzle-title').innerText = "👑 פוֹקֵימוֹן זָהָב מְיֻחָד! 👑";
+            document.getElementById('puzzle-status-text').innerText = `חֶלְקֵי זָהָב: ${targetMap.pieces} מִתּוֹךְ 10`;
+        } else {
+            board.classList.remove('gold');
+            document.getElementById('puzzle-title').innerText = `זָכִיתָ בְּחֵלֶק מִפּוֹקֵימוֹן #${activePokemonIndex}!`;
+            document.getElementById('puzzle-status-text').innerText = `חֲלָקִים: ${targetMap.pieces} מִתּוֹךְ 10`;
+        }
+
+        // יצירת 12 משבצות (10 חלקי פאזל רשמיים לרשת יפה של 4x3)
+        for (let i = 0; i < 12; i++) {
+            let piece = document.createElement('div');
+            piece.classList.add('puzzle-piece');
+            
+            // אם המשבצת נכללת בחלקים שהילד כבר פתח
+            if (i < targetMap.pieces) {
+                piece.classList.add('unlocked');
+            }
+            board.appendChild(piece);
+        }
+
+        // אם הפוקימון הושלם כולו!
+        if (targetMap.pieces >= 10) {
+            triggerCelebration();
+            targetMap.pieces = 0; 
+            if (!isGoldReward) {
+                targetMap.completed++;
+                activePokemonIndex = (activePokemonIndex % 50) + 1; // עובר לפוקימון הבא ברשימה
+            }
+        }
+    }
+
+    function triggerCelebration() {
+        document.getElementById('puzzle-title').innerText = "🎉 כָּל הַכָּבוֹד! הַפָּאזֶל הוּשְׁלַם! 🎉";
+        for (let i = 0; i < 30; i++) {
+            let confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = ['#FFD700', '#FF1493', '#00BFFF', '#32CD32'][Math.floor(Math.random() * 4)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+
+    function nextStage() {
+        correctAnswersCount = 0;
+        updateTopBar();
+        switchScreen('screen-game');
+        generateQuestion();
+    }
+</script>
+</body>
+</html>
