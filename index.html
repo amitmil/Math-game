@@ -2,16 +2,18 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>פּוֹקֵי-מָתֵמָטִיקָה</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>פּוֹקֵי-מָתֵמָטִיקָה - מַהֲדּוּרַת פְּרֶמְיוּם</title>
     <style>
         :root {
-            --bg-color: #F3F4F6;
-            --primary-color: #3B82F6;
-            --success-color: #10B981;
-            --danger-color: #EF4444;
-            --gold-color: #F59E0B;
-            --text-main: #1F2937;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --gold-color: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
         * {
@@ -20,6 +22,8 @@
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         body {
@@ -32,80 +36,252 @@
             overflow: hidden;
         }
 
-        /* מובייל קונטיינר קבוע ללא גלילה */
         .app-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 430px;
             height: 100vh;
-            max-height: 750px;
-            background-color: #FFFFFF;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-height: 850px;
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
         }
 
         .screen {
             display: none;
             flex-direction: column;
             height: 100%;
-            padding: 20px;
+            padding: 20px 20px calc(env(safe-area-inset-bottom) + 55px) 20px; /* מורם מסיבית למניעת התנגשות עם מקשי אנדרואיד */
             justify-content: space-between;
+            overflow-y: auto;
         }
 
         .screen.active {
             display: flex;
         }
 
-        /* מסך פרופיל */
-        .profile-title {
-            text-align: center;
-            font-size: 28px;
-            color: var(--primary-color);
-            margin-top: 20px;
+        /* חסימת גלילה למסכי משחק קריטיים */
+        #screen-game, #screen-puzzle {
+            overflow: hidden;
         }
 
-        .avatar-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        /* מסך כניסה והרשמה */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
             gap: 15px;
-            margin: 20px 0;
+            margin-top: 10px;
         }
 
-        .avatar-option {
-            border: 3px solid #E5E7EB;
-            border-radius: 16px;
-            padding: 10px;
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background-color: var(--card-bg);
+            padding: 6px;
+            border-radius: 15px;
+        }
+
+        .auth-tab {
+            padding: 12px;
             text-align: center;
-            font-size: 40px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 22px;
         }
 
-        .avatar-option.selected {
-            border-color: var(--primary-color);
-            background-color: #EFF6FF;
-            transform: scale(1.05);
+        .auth-tab.active {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 22px;
+            color: #ffcb05;
+        }
+
+        .form-group input {
+            background-color: var(--card-bg);
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 15px;
+            color: white;
+            font-size: 20px;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* גריד בחירת אווטאר */
+        .avatar-grid-auth {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 16px;
+        }
+
+        .avatar-item-auth {
+            background-color: var(--card-bg);
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .avatar-item-auth.selected {
+            border-color: #ffcb05;
+            background-color: #1e3a8a;
+        }
+
+        .avatar-img-auth {
+            width: 50px;
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .avatar-name-auth {
+            font-size: 18px;
             font-weight: bold;
         }
 
-        .form-group select, .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
+        /* מסך בית / מפת שלבים */
+        .title-main {
+            text-align: center;
+            font-size: 46px;
+            font-weight: 900;
+            color: #ffcb05;
+            text-shadow: -3px -3px 0 #3b4cca, 3px -3px 0 #3b4cca, -3px 3px 0 #3b4cca, 3px 3px 0 #3b4cca;
+            margin-top: 10px;
+        }
+
+        .user-welcome-header {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 10px;
+            gap: 15px;
+        }
+
+        .header-avatar {
+            width: 55px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .header-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-info .name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f8fafc;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
             font-size: 16px;
-            outline: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: right;
+            margin-top: 4px;
+            width: fit-content;
+        }
+
+        .stages-map-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(30, 41, 59, 0.4);
+            border-radius: 24px;
+            border: 2px dashed #334155;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scrollbar-width: none;
+        }
+        .stages-map-container::-webkit-scrollbar { display: none; }
+
+        .stage-node {
+            background-color: var(--card-bg);
+            border: 3px solid #334155;
+            border-radius: 20px;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .stage-node.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #0f172a;
+        }
+
+        .stage-node.current {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(135deg, #1e293b 0%, #172554 100%);
+        }
+
+        .stage-node.completed {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, #1e293b 0%, #064e3b 100%);
+        }
+
+        .stage-node-title {
+            font-size: 24px;
+            font-weight: 800;
+        }
+        
+        .stage-node-status {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 6px 15px;
+            border-radius: 50px;
+            background-color: rgba(15, 23, 42, 0.6);
+        }
+
+        .btn-menu {
+            background: linear-gradient(135deg, #ffcb05 0%, #f59e0b 100%);
+            color: #0f172a;
+            border: none;
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 26px;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b45309;
+            width: 100%;
         }
 
         /* מסך משחק */
@@ -113,176 +289,324 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 16px;
         }
 
-        .streak-badge { color: var(--danger-color); }
-        .gold-badge { color: var(--gold-color); }
-
-        .exercise-card {
-            background-color: #F9FAFB;
-            border: 2px solid #E5E7EB;
-            border-radius: 24px;
-            padding: 30px 10px;
-            text-align: center;
+        .math-arena {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            margin: 20px 0;
+            align-items: center;
+            background-color: var(--card-bg);
+            border-radius: 28px;
+            margin: 10px 0;
+            padding: 15px;
+            border: 2px solid #334155;
         }
 
-        .exercise-text {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 15px;
+        .stage-indicator {
+            font-size: 26px;
+            color: var(--gold-color);
+            font-weight: 800;
+            margin-bottom: 5px;
         }
 
-        .answer-display {
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--primary-color);
-            min-height: 55px;
+        .equation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 95px; /* פונט ענק לילדים */
+            font-weight: 900;
+            direction: ltr;
         }
 
-        /* מקלדת נומרית מובנית */
+        .equation-input {
+            min-width: 130px;
+            text-align: center;
+            color: #38bdf8;
+            border-bottom: 8px solid #38bdf8;
+            padding-bottom: 2px;
+        }
+
+        /* מקלדת */
         .keypad {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .key {
-            background-color: #F3F4F6;
+            background-color: #334155;
             border: none;
-            border-radius: 16px;
-            padding: 15px;
-            font-size: 22px;
-            font-weight: bold;
-            color: #374151;
+            border-radius: 20px;
+            padding: 16px 10px;
+            font-size: 34px;
+            font-weight: 900;
+            color: white;
             cursor: pointer;
-            active-background: #E5E7EB;
         }
+        .key:active { background-color: #475569; }
+        .key.action { background-color: #1e293b; color: var(--danger-color); }
 
-        .key:active {
-            background-color: #E5E7EB;
-        }
-
-        .action-btn {
+        .btn-check {
             width: 100%;
             background-color: var(--success-color);
-            color: white;
             border: none;
-            border-radius: 16px;
-            padding: 18px;
-            font-size: 20px;
-            font-weight: bold;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 26px;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 6px 0 #047857;
             cursor: pointer;
+            margin-bottom: 15px; /* מורם משמעותית */
+        }
+        .btn-check:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #047857;
         }
 
-        /* מסך פאזל / סוף שלב */
-        .puzzle-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
+        /* פאזל - שכבות מתוקנות לחלוטין */
+        .puzzle-wrapper {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: auto;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            border: 4px solid #334155;
+            overflow: hidden;
+        }
+
+        .puzzle-img-back {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            z-index: 1; /* התמונה מאחור */
         }
 
         .puzzle-board {
-            width: 200px;
-            height: 200px;
-            position: relative;
-            background-color: #E5E7EB;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 20px;
+            width: 100%;
+            height: 100%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(3, 1fr);
             gap: 2px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2; /* חלקי הפאזל מקדימה ומסתירים אותה */
+            background-color: transparent;
         }
 
         .puzzle-piece {
-            background-color: #9CA3AF; /* צבע חלקים חסרים - מוצלל */
-            transition: background-color 0.3s;
+            background-color: #0f172a; /* צבע אטום לחלוטין שמסתיר את התמונה */
+            opacity: 1;
+            transition: opacity 0.4s ease;
         }
 
-        .puzzle-piece.unlocked {
-            background-color: var(--primary-color); /* פוקימון רגיל שמתגלה */
+        .puzzle-piece.unlocked { 
+            opacity: 0; /* נעלם וחושף את החלק המקביל בתמונה */
+            pointer-events: none;
         }
 
-        .puzzle-board.gold .puzzle-piece.unlocked {
-            background-color: var(--gold-color); /* פוקימון זהב שמתגלה */
+        /* מסך אוסף */
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+            padding: 10px 5px;
+            flex-grow: 1;
         }
 
-        /* אפקטים וחגיגות */
+        .collection-item {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            padding: 20px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 3px solid #334155;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .collection-item.completed {
+            border-color: #ffcb05;
+            background: linear-gradient(180deg, #1e293b 0%, rgba(255, 203, 5, 0.1) 100%);
+        }
+
+        .col-img-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .col-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .col-img.locked { filter: brightness(0); }
+        .col-img.has-pieces { filter: brightness(0.15); }
+        .col-img.completed { filter: none; }
+
+        .col-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .col-badge {
+            background-color: #0f172a;
+            padding: 6px 15px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #38bdf8;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* מודל פוקימון מוגדל */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.98);
+            z-index: 100;
+            flex-direction: column;
+            padding: 30px 20px calc(env(safe-area-inset-bottom) + 50px) 20px;
+            justify-content: space-between;
+        }
+        .modal.active { display: flex; }
+
         .confetti {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #F59E0B;
-            animation: fall 2s linear infinite;
+            width: 8px;
+            height: 8px;
+            animation: fall 2.5s linear infinite;
             top: -10px;
+            z-index: 99;
         }
-
-        @keyframes fall {
-            to { transform: translateY(760px) rotate(360deg); }
-        }
+        @keyframes fall { to { transform: translateY(850px) rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="app-container" id="app">
     
-    <div id="screen-profile" class="screen active">
-        <h1 class="profile-title">בְּחַר מְאַמֵּן! 👦👧</h1>
+    <!-- מסך 0: התחברות / הרשמה -->
+    <div id="screen-auth" class="screen active">
+        <div>
+            <h1 class="title-main">פּוֹקֵי-מָתֵמָטִיקָה</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-top: 5px; font-size: 18px;">מַסָּע הַמִּסְפָּרִים הַגָּדוֹל!</p>
+        </div>
+
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">כְּנִיסָה</div>
+                <div class="auth-tab" id="tab-register" onclick="setAuthTab('register')">הַרְשָׁמָה</div>
+            </div>
+
+            <div class="form-group" id="group-firstname" style="display: none;">
+                <label>שֵׁם פְּרָטִי:</label>
+                <input type="text" id="auth-firstname" placeholder="הַכְנֵס שֵׁם פְּרָטִי">
+            </div>
+
+            <div class="form-group" id="group-username">
+                <label id="label-username">שֵׁם פְּרָטִי אוֹ כִּינוּי:</label>
+                <input type="text" id="auth-username" placeholder="הַכְנֵס שֵׁם אוֹ כִּינוּי">
+            </div>
+
+            <div class="form-group" id="group-nickname" style="display: none;">
+                <label>כִּינוּי:</label>
+                <input type="text" id="auth-nickname" placeholder="הַכְנֵס כִּינוּי">
+            </div>
+
+            <div class="form-group">
+                <label id="label-dob">קוֹד כְּנִיסָה (4 סִפְרוֹת):</label>
+                <input type="text" id="auth-dob" pattern="[0-9]*" inputmode="numeric" maxlength="4" placeholder="לְדֻגְמָא: 1405">
+            </div>
+
+            <div class="form-group" id="group-avatar" style="display: none;">
+                <label>בְּחַר מְאַמֵּן פוֹקֵימוֹן:</label>
+                <div class="avatar-grid-auth" id="avatar-picker-grid">
+                    <!-- יתמלא דינמית -->
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-menu" id="btn-auth-action" onclick="handleAuth()">הִתְחַבֵּר וְשַׂחֵק! 🚀</button>
+    </div>
+    
+    <!-- מסך 1: מפת השלבים המקובעת -->
+    <div id="screen-hub" class="screen">
+        <div>
+            <h1 class="title-main">פּוֹקֵי-מָתֵמָטִיקָה</h1>
+            
+            <div class="user-welcome-header">
+                <img src="" class="header-avatar" id="user-header-img">
+                <div class="header-info">
+                    <div class="name" id="user-welcome-text">שָׁלוֹם, הַמְּאַמֵּן!</div>
+                    <button class="logout-btn" onclick="handleLogout()">הַחְלֵף מִשְׁתַּמֵּשׁ 🔄</button>
+                </div>
+            </div>
+        </div>
         
-        <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('👦', this)">👦</div>
-            <div class="avatar-option" onclick="selectAvatar('👧', this)">👧</div>
-            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
+        <div class="stages-map-container" id="stages-map">
+            <!-- נוצר דינמית -->
         </div>
 
-        <div class="form-group">
-            <label>שֵׁם הַמְּאַמֵּן:</label>
-            <input type="text" id="player-name" value="אַלּוּף">
+        <div class="bottom-nav-hub">
+            <button class="btn-menu" style="background: #1e293b; color: #38bdf8; border: 2px solid #334155; box-shadow: none;" onclick="openCollection()">📜 הָאוֹסֶף הָעֲנָק שֶׁלִּי</button>
         </div>
-
-        <div class="form-group">
-            <label>רָמַת הַמִּשְׂחָק (עַד כַּמָּה):</label>
-            <select id="game-range">
-                <option value="20">עַד 20</option>
-                <option value="30" selected>עַד 30</option>
-                <option value="50">עַד 50</option>
-                <option value="100">עַד 100</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>רָמַת קֹשִׁי:</label>
-            <select id="game-difficulty" onchange="updateDifficultyTarget()">
-                <option value="easy">קַלָּה (7 תְּשׁוּבוֹת לְחֵלֶק)</option>
-                <option value="medium">בֵּינוֹנִית (5 תְּשׁוּבוֹת לְחֵלֶק)</option>
-                <option value="hard">קָשָׁה (3 תְּשׁוּבוֹת לְחֵלֶק)</option>
-            </select>
-        </div>
-
-        <button class="action-btn" onclick="startGame()">קָדִימָה, לַמִּשְׂחָק! 🚀</button>
     </div>
 
+    <!-- מסך 2: זירת המשחק -->
     <div id="screen-game" class="screen">
         <div class="top-bar">
-            <span class="streak-badge" id="game-streak">🔥 רֶצֶף: 0</span>
-            <span class="gold-badge" id="game-gold-progress">👑 זָהָב: 0/0</span>
-            <span id="game-progress">🎯 חֵלֶק: 0/7</span>
+            <span style="color: var(--danger-color);" id="game-streak">🔥 רֶצֶף: 0</span>
+            <span style="color: #38bdf8;" id="game-progress">📝 תרגיל: 1/7</span>
+            <span style="cursor: pointer; font-size: 24px;" onclick="returnToHub()">🏠</span>
         </div>
 
-        <div class="exercise-card">
-            <div class="exercise-text" id="exercise-text">כַּמָּה זֶה...</div>
-            <div class="answer-display" id="answer-display">?</div>
+        <div class="math-arena">
+            <div class="stage-indicator" id="arena-stage-title">שלב 1</div>
+            <div class="equation">
+                <span id="eq-n1">0</span>
+                <span id="eq-op">+</span>
+                <span id="eq-n2">0</span>
+                <span>=</span>
+                <span class="equation-input" id="eq-input">?</span>
+            </div>
         </div>
 
         <div class="keypad">
@@ -295,73 +619,283 @@
             <button class="key" onclick="pressKey('7')">7</button>
             <button class="key" onclick="pressKey('8')">8</button>
             <button class="key" onclick="pressKey('9')">9</button>
-            <button class="key" style="background-color:#E5E7EB;" onclick="pressKey('C')">💥</button>
+            <button class="key action" onclick="pressKey('C')">C</button>
             <button class="key" onclick="pressKey('0')">0</button>
-            <button class="key" style="background-color:#E5E7EB;" onclick="pressKey('B')">⌫</button>
+            <button class="key action" onclick="pressKey('B')">⌫</button>
         </div>
 
-        <button class="action-btn" id="btn-submit" onclick="checkAnswer()">בְּדֹק! ✔️</button>
+        <button class="btn-check" id="btn-action" onclick="checkAnswer()">בְּדֹק! ✔️</button>
     </div>
 
+    <!-- מסך 3: מסך פאזל סוף שלב -->
     <div id="screen-puzzle" class="screen">
-        <h2 style="text-align: center; margin-top:10px;" id="puzzle-title">קִבַּלְתָּ חֵלֶק פָּאזֶל! 🧩</h2>
+        <h2 style="text-align: center; font-size: 32px; color: #ffcb05;" id="puzzle-title">הַשָּׁלָב הוּשְׁלַם! 🧩</h2>
         
-        <div class="puzzle-container">
-            <div class="puzzle-board" id="puzzle-board">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+            <div class="puzzle-wrapper">
+                <img src="" class="puzzle-img-back" id="puzzle-img-back" alt="pokemon">
+                <div class="puzzle-board" id="puzzle-board">
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
                 </div>
-            <div id="puzzle-status-text" style="font-weight: bold; font-size: 18px; text-align: center;"></div>
+            </div>
+            <p id="puzzle-status" style="text-align: center; font-size: 24px; font-weight: bold; margin-top: 25px;"></p>
         </div>
 
-        <button class="action-btn" onclick="nextStage()">לַשָּׁלָב הַבָּא! ➡️</button>
+        <button class="btn-menu" onclick="finishPuzzleAndGoHome()">חֲזָרָה לַמַּפָּה 🗺️</button>
+    </div>
+
+    <!-- מסך 4: מסך אוסף ענק -->
+    <div id="screen-collection" class="screen">
+        <div class="collection-container">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <button class="back-btn" onclick="returnToHub()">❮ חֲזָרָה</button>
+                <h2 style="margin: 0 auto; padding-right: 50px; font-size: 28px; color: #ffcb05;">הָאוֹסֶף הָעֲנָק שֶׁלִּי</h2>
+            </div>
+            <div class="collection-grid" id="collection-grid"></div>
+        </div>
+    </div>
+
+    <!-- מסך 5: מודל תצוגה מוגדלת -->
+    <div id="view-pokemon-modal" class="modal">
+        <div style="display: flex; align-items: center;">
+            <button class="back-btn" onclick="closePokemonModal()">❮ סְגִירָה</button>
+            <h2 id="modal-pokemon-name" style="margin: 0 auto; padding-right: 50px; font-size: 32px; color: #ffcb05;"></h2>
+        </div>
+
+        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="puzzle-wrapper" style="width: 280px; height: 280px;">
+                <img src="" class="puzzle-img-back" id="modal-pokemon-img" style="width:90%; height:90%;">
+                <div class="puzzle-board" id="modal-puzzle-board">
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
+                    <div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div><div class="puzzle-piece"></div>
+                </div>
+            </div>
+            <p id="modal-pokemon-status" style="font-size: 26px; font-weight: bold; margin-top: 25px; text-align: center;"></p>
+        </div>
+        <div></div>
     </div>
 
 </div>
 
 <script>
-    // משתני המצב של האפליקציה (State)
-    let player = { name: "אלוף", avatar: "👦", maxRange: 30, difficulty: "easy" };
-    let currentStreak = 0;
-    let correctAnswersCount = 0;
-    let targetAnswers = 7; // משתנה לפי רמה
-    
-    // מעקב שלבים לצורך פוקימון זהב
-    let completedStagesCount = 0;
-    let goldTargetStages = 10; // קל=10, בינוני=7, קשה=3
+    // מאגר תמונות מאמנים רשמיות ויציבות מוויקיפדיה העולמית
+    const TRAINER_AVATARS = [
+        { key: "ash", name: "אֵשׁ קֶטְצָ'אם", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Ash_Ketchum_Anime_Style.svg/150px-Ash_Ketchum_Anime_Style.svg.png" },
+        { key: "misty", name: "מִיסְטִי", img: "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/MistyPokemon.png/150px-MistyPokemon.png" },
+        { key: "brock", name: "בְּרוֹק", img: "https://upload.wikimedia.org/wikipedia/en/thumb/f/f5/BrockPokemon.png/150px-BrockPokemon.png" },
+        { key: "serena", name: "סֶרֶנָה", img: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/SerenaPokemon.png/150px-SerenaPokemon.png" }
+    ];
 
-    // פוקימונים (5 מתוך 50 נבחרים רנדומלית בכל הרצה)
-    let activePokemonIndex = 1;
-    let pokemonCollection = {
-        regular: { pieces: 0, completed: 0 },
-        gold: { pieces: 0, completed: 0 }
-    };
+    const POKEMON_DATA = [
+        { id: 25, name: "פִּיקָאצ'וּ" }, { id: 1, name: "בַּלְבָאזוֹר" }, { id: 4, name: "צָ'ארְมַנְדֶר" },
+        { id: 7, name: "סְקְוִירְטֶל" }, { id: 133, name: "אִיבִי" }, { id: 94, name: "גֶנְגָאר" },
+        { id: 143, name: "סְנוֹרְלַקְס" }, { id: 6, name: "צָ'ארִיזָארְד" }, { id: 9, name: "בְּלָאסְטוֹיְז" },
+        { id: 3, name: "וֶנוֹזָאֹר" }, { id: 151, name: "מְיוּ" }, { id: 52, name: "מְאוּת'" },
+        { id: 54, name: "פְּסַיְדָאק" }, { id: 58, name: "גְּרוֹלִית'" }, { id: 59, name: "אַרְקָנַיְין" },
+        { id: 175, name: "טוֹגֶפִּי" }, { id: 39, name: "גִ'יגְלִיפָאף" }, { id: 130, name: "גְּיָארָדוֹס" },
+        { id: 131, name: "לָאפְּרָאס" }, { id: 149, name: "דְּרָאגוֹנַיְיט" }
+    ];
 
-    let currentQuestion = { num1: 0, num2: 0, op: '+', answer: 0 };
+    const TOTAL_STAGES = 50;
+    let globalUsers = {}; 
+    let currentUserKey = null; 
+    let currentAuthTab = 'login';
+    let selectedTrainerKey = 'ash';
+
+    let currentQuestionIndex = 1;
     let userTypedAnswer = "";
-    let isGoldReward = false;
+    let expectedAnswer = 0;
+    let isLocked = false;
 
-    function selectAvatar(emoji, element) {
-        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        player.avatar = emoji;
+    function loadDatabase() {
+        const data = localStorage.getItem('pokemath_ultimate_db_v5');
+        if (data) {
+            globalUsers = JSON.parse(data);
+        } else {
+            globalUsers = {};
+            localStorage.setItem('pokemath_ultimate_db_v5', JSON.stringify(globalUsers));
+        }
+        renderTrainerPicker();
     }
 
-    function updateDifficultyTarget() {
-        const diff = document.getElementById('game-difficulty').value;
-        player.difficulty = diff;
-        if (diff === 'easy') { targetAnswers = 7; goldTargetStages = 10; }
-        if (diff === 'medium') { targetAnswers = 5; goldTargetStages = 7; }
-        if (diff === 'hard') { targetAnswers = 3; goldTargetStages = 3; }
+    function saveDatabase() {
+        localStorage.setItem('pokemath_ultimate_db_v5', JSON.stringify(globalUsers));
     }
 
-    function startGame() {
-        player.name = document.getElementById('player-name').value;
-        player.maxRange = parseInt(document.getElementById('game-range').value);
-        updateDifficultyTarget();
+    function setAuthTab(tab) {
+        currentAuthTab = tab;
+        document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+        document.getElementById('tab-register').classList.toggle('active', tab === 'register');
 
-        // אתחול מדדים
-        correctAnswersCount = 0;
-        updateTopBar();
+        document.getElementById('group-firstname').style.display = tab === 'register' ? 'flex' : 'none';
+        document.getElementById('group-nickname').style.display = tab === 'register' ? 'flex' : 'none';
+        document.getElementById('group-avatar').style.display = tab === 'register' ? 'flex' : 'none';
         
+        document.getElementById('label-username').innerText = tab === 'login' ? "שֵׁם פְּרָטִי אוֹ כִּינוּי:" : "שֵׁם מִשְׁתַּמֵּשׁ (לְהִתְחַבְּרוּת הבאה):";
+        document.getElementById('auth-username').placeholder = tab === 'login' ? "הַכְנֵס שֵׁם אוֹ כִּינוּי" : "בְּחַר שֵׁם מִשְׁתַּמֵּשׁ";
+        document.getElementById('label-dob').innerText = tab === 'login' ? "קוֹד כְּנִיסָה (4 סִפְרוֹת):" : "קְבַע קוֹד כְּנִיסָה (4 סִפְרוֹת):";
+        document.getElementById('auth-dob').placeholder = tab === 'login' ? "הַכְנֵס קוֹד" : "בְּחַר קוֹד (לְדֻגְמָא 1405)";
+        document.getElementById('btn-auth-action').innerText = tab === 'login' ? "הִתְחַבֵּר וְשַׂחֵק! 🚀" : "צוֹר חֶשְׁבּוֹן וְהַתְחֵל! ✨";
+    }
+
+    function renderTrainerPicker() {
+        const grid = document.getElementById('avatar-picker-grid');
+        grid.innerHTML = "";
+        TRAINER_AVATARS.forEach(t => {
+            let item = document.createElement('div');
+            item.className = `avatar-item-auth ${t.key === selectedTrainerKey ? 'selected' : ''}`;
+            item.onclick = () => {
+                selectedTrainerKey = t.key;
+                renderTrainerPicker();
+            };
+
+            let img = document.createElement('img');
+            img.className = "avatar-img-auth";
+            img.src = t.img;
+
+            let name = document.createElement('div');
+            name.className = "avatar-name-auth";
+            name.innerText = t.name;
+
+            item.appendChild(img);
+            item.appendChild(name);
+            grid.appendChild(item);
+        });
+    }
+
+    function handleAuth() {
+        const usernameInput = document.getElementById('auth-username').value.trim();
+        const dobInput = document.getElementById('auth-dob').value.trim();
+
+        if (!usernameInput || !dobInput) {
+            alert("נָא לְמַלֹּאת אֶת כָּל הַשָּׂדוֹת!");
+            return;
+        }
+
+        if (dobInput.length !== 4 || isNaN(dobInput)) {
+            alert("קוֹד הַכְּנִיסָה חַיָּב לִהְיוֹת בְּדִיּוּק 4 סִפְרוֹת (לְדֻגְמָא 1405)!");
+            return;
+        }
+
+        if (currentAuthTab === 'register') {
+            const firstName = document.getElementById('auth-firstname').value.trim();
+            const nickname = document.getElementById('auth-nickname').value.trim();
+
+            if (!firstName || !nickname) {
+                alert("בְּהַרְשָׁמָה יֵשׁ לְהַכְנִיס שֵׁם פְּרָטִי וְכִּינוּי!");
+                return;
+            }
+
+            if (globalUsers[usernameInput.toLowerCase()]) {
+                alert("שֵׁם מִשְׁתַּמֵּשׁ זֶה כְּבָר תָּפוּס!");
+                return;
+            }
+
+            let newUser = {
+                firstName: firstName,
+                nickname: nickname,
+                dob: dobInput,
+                avatarKey: selectedTrainerKey,
+                maxUnlockedStage: 1,
+                currentStreak: 0,
+                progressStorage: {},
+                selectedStage: 1
+            };
+            POKEMON_DATA.forEach(p => { newUser.progressStorage[p.id] = 0; });
+
+            globalUsers[usernameInput.toLowerCase()] = newUser;
+            globalUsers[firstName.toLowerCase()] = newUser; // מאפשר כניסה גם עם שם פרטי
+            globalUsers[nickname.toLowerCase()] = newUser;  // מאפשר כניסה גם עם כינוי
+            saveDatabase();
+
+            currentUserKey = usernameInput.toLowerCase();
+            alert(`חֶשְׁבּוֹן חָדָשׁ נוֹצַר בְּהַצְלָחָה לְ ${firstName}!`);
+            enterApp();
+
+        } else {
+            const userKey = usernameInput.toLowerCase();
+            if (globalUsers[userKey] && globalUsers[userKey].dob === dobInput) {
+                currentUserKey = userKey;
+                enterApp();
+            } else {
+                alert("שֵׁם מִשְׁתַּמֵּשׁ אוֹ קוֹד כְּנִיסָה שְׁגוּיִים!");
+            }
+        }
+    }
+
+    function enterApp() {
+        switchScreen('screen-hub');
+        const user = globalUsers[currentUserKey];
+        const trainer = TRAINER_AVATARS.find(t => t.key === user.avatarKey) || TRAINER_AVATARS[0];
+        
+        document.getElementById('user-header-img').src = trainer.img;
+        document.getElementById('user-welcome-text').innerText = `שָׁלוֹם, הַמְּאַמֵּן ${user.firstName}!`;
+        
+        renderStagesMap();
+    }
+
+    function handleLogout() {
+        currentUserKey = null;
+        document.getElementById('auth-username').value = "";
+        document.getElementById('auth-dob').value = "";
+        document.getElementById('auth-firstname').value = "";
+        document.getElementById('auth-nickname').value = "";
+        switchScreen('screen-auth');
+        setAuthTab('login');
+    }
+
+    function renderStagesMap() {
+        const mapContainer = document.getElementById('stages-map');
+        mapContainer.innerHTML = "";
+        const user = globalUsers[currentUserKey];
+
+        for (let i = 1; i <= TOTAL_STAGES; i++) {
+            let node = document.createElement('div');
+            node.className = "stage-node";
+            
+            let title = document.createElement('div');
+            title.className = "stage-node-title";
+            title.innerText = `שָׁלָב ${i}`;
+
+            let status = document.createElement('div');
+            status.className = "stage-node-status";
+
+            if (i < user.maxUnlockedStage) {
+                node.classList.add('completed');
+                status.innerText = "מוּשְׁלָם ✨";
+                node.onclick = () => launchStage(i);
+            } else if (i === user.maxUnlockedStage) {
+                node.classList.add('current');
+                status.innerText = "שַׂחֵק 🎯";
+                node.onclick = () => launchStage(i);
+            } else {
+                node.classList.add('locked');
+                status.innerText = "נָעוּל 🔒";
+            }
+
+            node.appendChild(title);
+            node.appendChild(status);
+            mapContainer.appendChild(node);
+        }
+
+        setTimeout(() => {
+            const currentNodes = mapContainer.getElementsByClassName('current');
+            if (currentNodes.length > 0) {
+                currentNodes[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 200);
+    }
+
+    function launchStage(stageNumber) {
+        const user = globalUsers[currentUserKey];
+        user.selectedStage = stageNumber;
+        currentQuestionIndex = 1;
+        isLocked = false;
+        document.getElementById('arena-stage-title').innerText = `שָׁלָב ${stageNumber}`;
+        updateTopBar();
         switchScreen('screen-game');
         generateQuestion();
     }
@@ -371,159 +905,197 @@
         document.getElementById(screenId).classList.add('active');
     }
 
+    function returnToHub() {
+        enterApp();
+    }
+
     function updateTopBar() {
-        document.getElementById('game-streak').innerText = `🔥 רֶצֶף: ${currentStreak}`;
-        document.getElementById('game-progress').innerText = `🎯 חֵלֶק: ${correctAnswersCount}/${targetAnswers}`;
-        document.getElementById('game-gold-progress').innerText = `👑 זָהָב: ${completedStagesCount}/${goldTargetStages}`;
+        const user = globalUsers[currentUserKey];
+        document.getElementById('game-streak').innerText = `🔥 רֶצֶף: ${user.currentStreak}`;
+        document.getElementById('game-progress').innerText = `📝 תרגיל: ${currentQuestionIndex}/7`;
     }
 
     function generateQuestion() {
+        if (isLocked) return;
         userTypedAnswer = "";
-        document.getElementById('answer-display').innerText = "?";
-        document.getElementById('answer-display').style.color = "var(--primary-color)";
-        document.getElementById('btn-submit').innerText = "בְּדֹק! ✔️";
-        document.getElementById('btn-submit').style.backgroundColor = "var(--success-color)";
+        const inputDisplay = document.getElementById('eq-input');
+        inputDisplay.innerText = "?";
+        inputDisplay.style.color = "#38bdf8";
+        inputDisplay.style.borderBottomColor = "#38bdf8";
 
-        let n1 = Math.floor(Math.random() * (player.maxRange - 5)) + 5;
-        let n2 = Math.floor(Math.random() * 10) + 1;
-        let op = Math.random() > 0.5 ? '+' : '-';
+        let n1, n2, op;
+        op = Math.random() > 0.5 ? '+' : '-';
 
-        if (op === '-') {
-            if (n1 < n2) { let temp = n1; n1 = n2; n2 = temp; }
-            currentQuestion.answer = n1 - n2;
+        if (op === '+') {
+            n1 = Math.floor(Math.random() * 20) + 1;
+            n2 = Math.floor(Math.random() * (30 - n1)) + 1;
+            expectedAnswer = n1 + n2;
         } else {
-            currentQuestion.answer = n1 + n2;
+            n1 = Math.floor(Math.random() * 25) + 6;
+            n2 = Math.floor(Math.random() * (n1 - 1)) + 1;
+            expectedAnswer = n1 - n2;
         }
 
-        currentQuestion.num1 = n1;
-        currentQuestion.num2 = n2;
-        currentQuestion.op = op;
-
-        let opHebrew = op === '+' ? 'וְעוֹד' : 'פָּחוֹת';
-        document.getElementById('exercise-text').innerText = `כַּמָּה זֶה\n${n1} ${opHebrew} ${n2}?`;
+        document.getElementById('eq-n1').innerText = n1;
+        document.getElementById('eq-n2').innerText = n2;
+        document.getElementById('eq-op').innerText = op;
     }
 
     function pressKey(key) {
-        if (document.getElementById('btn-submit').innerText === "הַבָּא ➡️") return;
-
-        if (key === 'C') {
-            userTypedAnswer = "";
-        } else if (key === 'B') {
-            userTypedAnswer = userTypedAnswer.slice(0, -1);
-        } else {
-            if (userTypedAnswer.length < 3) userTypedAnswer += key;
-        }
-        document.getElementById('answer-display').innerText = userTypedAnswer || "?";
+        if (isLocked) return;
+        if (key === 'C') { userTypedAnswer = ""; }
+        else if (key === 'B') { userTypedAnswer = userTypedAnswer.slice(0, -1); }
+        else { if (userTypedAnswer.length < 3) userTypedAnswer += key; }
+        document.getElementById('eq-input').innerText = userTypedAnswer || "?";
     }
 
     function checkAnswer() {
-        const btn = document.getElementById('btn-submit');
-        if (btn.innerText === "הַבָּא ➡️") {
-            generateQuestion();
-            return;
-        }
-
-        if (!userTypedAnswer) return;
-
+        if (isLocked || !userTypedAnswer) return;
+        const inputDisplay = document.getElementById('eq-input');
         let userVal = parseInt(userTypedAnswer);
-        if (userVal === currentQuestion.answer) {
-            correctAnswersCount++;
-            currentStreak++;
-            document.getElementById('answer-display').innerText = "נָכוֹן! 🎉";
-            document.getElementById('answer-display').style.color = "var(--success-color)";
-            
-            // בונוס מיוחד על 5 תשובות נכונות ברצף
-            if (currentStreak === 5) {
-                correctAnswersCount = Math.min(correctAnswersCount + 1, targetAnswers);
-                alert("בּוֹנוּס רֶצֶף! חֵלֶק נוסף מִתְקָרֵב!");
-            }
+        const user = globalUsers[currentUserKey];
+
+        if (userVal === expectedAnswer) {
+            user.currentStreak++;
+            inputDisplay.style.color = "var(--success-color)";
+            inputDisplay.style.borderBottomColor = "var(--success-color)";
+            saveDatabase();
+            isLocked = true;
+
+            setTimeout(() => {
+                isLocked = false;
+                if (currentQuestionIndex >= 7) { showPuzzleScreen(); }
+                else { currentQuestionIndex++; updateTopBar(); generateQuestion(); }
+            }, 1000);
         } else {
-            currentStreak = 0;
-            document.getElementById('answer-display').innerText = `טָעוּת... (${currentQuestion.answer})`;
-            document.getElementById('answer-display').style.color = "var(--danger-color)";
-        }
-
-        updateTopBar();
-
-        if (correctAnswersCount >= targetAnswers) {
-            // הילד סיים שלב וזכה בחלק רגיל!
-            completedStagesCount++;
-            pokemonCollection.regular.pieces++;
-            isGoldReward = false;
-
-            // בדיקה אם הגיע הזמן לחלק זהב מיוחד
-            if (completedStagesCount >= goldTargetStages) {
-                completedStagesCount = 0;
-                pokemonCollection.gold.pieces++;
-                isGoldReward = true;
-            }
-
-            setTimeout(showPuzzleScreen, 1200);
-        } else {
-            btn.innerText = "הַבָּא ➡️";
-            btn.style.backgroundColor = "var(--primary-color)";
+            user.currentStreak = 0;
+            inputDisplay.style.color = "var(--danger-color)";
+            inputDisplay.style.borderBottomColor = "var(--danger-color)";
+            updateTopBar();
+            saveDatabase();
         }
     }
 
     function showPuzzleScreen() {
         switchScreen('screen-puzzle');
-        const board = document.getElementById('puzzle-board');
-        board.innerHTML = "";
+        const user = globalUsers[currentUserKey];
+        let pkm = POKEMON_DATA[(user.selectedStage - 1) % POKEMON_DATA.length];
         
-        let targetMap = isGoldReward ? pokemonCollection.gold : pokemonCollection.regular;
+        if (user.progressStorage[pkm.id] === undefined) user.progressStorage[pkm.id] = 0;
         
-        if (isGoldReward) {
-            board.classList.add('gold');
-            document.getElementById('puzzle-title').innerText = "👑 פוֹקֵימוֹן זָהָב מְיֻחָד! 👑";
-            document.getElementById('puzzle-status-text').innerText = `חֶלְקֵי זָהָב: ${targetMap.pieces} מִתּוֹךְ 10`;
-        } else {
-            board.classList.remove('gold');
-            document.getElementById('puzzle-title').innerText = `זָכִיתָ בְּחֵלֶק מִפּוֹקֵימוֹן #${activePokemonIndex}!`;
-            document.getElementById('puzzle-status-text').innerText = `חֲלָקִים: ${targetMap.pieces} מִתּוֹךְ 10`;
+        let earnedNewPiece = (user.selectedStage === user.maxUnlockedStage);
+        if (earnedNewPiece) {
+            user.progressStorage[pkm.id] = Math.min(user.progressStorage[pkm.id] + 1, 10);
         }
+        let currentPieces = user.progressStorage[pkm.id];
 
-        // יצירת 12 משבצות (10 חלקי פאזל רשמיים לרשת יפה של 4x3)
-        for (let i = 0; i < 12; i++) {
-            let piece = document.createElement('div');
-            piece.classList.add('puzzle-piece');
-            
-            // אם המשבצת נכללת בחלקים שהילד כבר פתח
-            if (i < targetMap.pieces) {
-                piece.classList.add('unlocked');
-            }
-            board.appendChild(piece);
-        }
+        const imgBack = document.getElementById('puzzle-img-back');
+        imgBack.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pkm.id}.png`;
 
-        // אם הפוקימון הושלם כולו!
-        if (targetMap.pieces >= 10) {
+        if (currentPieces >= 10 && earnedNewPiece) {
+            document.getElementById('puzzle-title').innerText = "הַפָּאזֶל הוּשְׁלַם! 🎉";
+            document.getElementById('puzzle-status').innerText = `תָּפַסְתָּ אֶת ${pkm.name} מָלֵא!`;
             triggerCelebration();
-            targetMap.pieces = 0; 
-            if (!isGoldReward) {
-                targetMap.completed++;
-                activePokemonIndex = (activePokemonIndex % 50) + 1; // עובר לפוקימון הבא ברשימה
-            }
+        } else {
+            document.getElementById('puzzle-title').innerText = earnedNewPiece ? "קִבַּלְתָּ חֵלֶק פָּאזֶל! 🧩" : "סִיַּמְתָּ אֶת השָּׁלָב שׁוּב! 🔄";
+            document.getElementById('puzzle-status').innerText = `חֲלָקִים שֶׁנֶּחְשְׂפוּ: ${currentPieces} מִתּוֹךְ 10`;
         }
+
+        const pieces = document.querySelectorAll('#puzzle-board .puzzle-piece');
+        pieces.forEach((piece, index) => {
+            if (index < currentPieces || index >= 10) { piece.classList.add('unlocked'); }
+            else { piece.classList.remove('unlocked'); }
+        });
+
+        if (user.selectedStage === user.maxUnlockedStage) {
+            user.maxUnlockedStage++;
+        }
+        saveDatabase();
     }
 
     function triggerCelebration() {
-        document.getElementById('puzzle-title').innerText = "🎉 כָּל הַכָּבוֹד! הַפָּאזֶל הוּשְׁלַם! 🎉";
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 35; i++) {
             let confetti = document.createElement('div');
             confetti.classList.add('confetti');
             confetti.style.left = Math.random() * 100 + '%';
-            confetti.style.backgroundColor = ['#FFD700', '#FF1493', '#00BFFF', '#32CD32'][Math.floor(Math.random() * 4)];
-            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.backgroundColor = ['#ffcb05', '#3b82f6', '#10b981', '#ef4444', '#ec4899'][Math.floor(Math.random() * 5)];
+            confetti.style.animationDelay = Math.random() * 1.5 + 's';
             document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 3000);
+            setTimeout(() => confetti.remove(), 2500);
         }
     }
 
-    function nextStage() {
-        correctAnswersCount = 0;
-        updateTopBar();
-        switchScreen('screen-game');
-        generateQuestion();
+    function finishPuzzleAndGoHome() { returnToHub(); }
+
+    function openCollection() {
+        const grid = document.getElementById('collection-grid');
+        grid.innerHTML = "";
+        const user = globalUsers[currentUserKey];
+
+        POKEMON_DATA.forEach(p => {
+            let pieces = user.progressStorage[p.id] || 0;
+            let isCompleted = pieces >= 10;
+            let hasAnyPieces = pieces > 0;
+
+            let card = document.createElement('div');
+            card.className = `collection-item ${isCompleted ? 'completed' : ''}`;
+            card.onclick = () => viewPokemonDetails(p.id);
+
+            let imgContainer = document.createElement('div');
+            imgContainer.className = "col-img-container";
+
+            let img = document.createElement('img');
+            img.className = `col-img ${isCompleted ? 'completed' : (hasAnyPieces ? 'has-pieces' : 'locked')}`;
+            img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
+            imgContainer.appendChild(img);
+
+            let name = document.createElement('div');
+            name.className = "col-name";
+            name.innerText = (hasAnyPieces || isCompleted) ? p.name : "?".repeat(p.name.length);
+
+            let badge = document.createElement('div');
+            badge.className = "col-badge";
+            badge.innerText = isCompleted ? "מוּשְׁלָם! ✨" : `${pieces}/10 חֲלָקִים`;
+
+            card.appendChild(imgContainer);
+            card.appendChild(name);
+            card.appendChild(badge);
+            grid.appendChild(card);
+        });
+
+        switchScreen('screen-collection');
     }
+
+    function viewPokemonDetails(pokemonId) {
+        const pkm = POKEMON_DATA.find(p => p.id === pokemonId);
+        const user = globalUsers[currentUserKey];
+        let pieces = user.progressStorage[pokemonId] || 0;
+        let isCompleted = pieces >= 10;
+        let hasAnyPieces = pieces > 0;
+
+        const modal = document.getElementById('view-pokemon-modal');
+        const modalName = document.getElementById('modal-pokemon-name');
+        const modalImg = document.getElementById('modal-pokemon-img');
+        const modalStatus = document.getElementById('modal-pokemon-status');
+
+        modalName.innerText = (hasAnyPieces || isCompleted) ? pkm.name : "?".repeat(pkm.name.length);
+        modalImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pkm.id}.png`;
+        modalStatus.innerText = isCompleted ? "פּוֹקֵימוֹן מוּשְׁלָם וְתָפוּס! ✨" : `נֶחְשְׂפוּ ${pieces} מִתּוֹךְ 10 חֲלָקִים`;
+
+        const modalPieces = document.querySelectorAll('#modal-puzzle-board .puzzle-piece');
+        modalPieces.forEach((piece, index) => {
+            if (index < pieces || index >= 10) { piece.classList.add('unlocked'); }
+            else { piece.classList.remove('unlocked'); }
+        });
+
+        modal.classList.add('active');
+    }
+
+    function closePokemonModal() {
+        document.getElementById('view-pokemon-modal').classList.remove('active');
+    }
+
+    window.onload = loadDatabase;
 </script>
 </body>
 </html>
